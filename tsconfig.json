@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "removeComments": false,
+    "sourceMap": true,
+    "strict": true
+  }
+}
+
