@@ -60,6 +60,8 @@ class Game {
          *
          */
         this.board.removeSelectedBalls();
+        this.board.gravitationallyPullDownBalls();
+        this.board.feedNewBalls();
     }
 
     handleTouch(touch: Touch, eventType: string) {
@@ -181,7 +183,15 @@ class Game {
             console.error("Got end event, but there was no active touch. Nothing to do.");
             return;
         }
-        this.collapse();
+        const [startR, startC] = this.activeTouch.startRC;
+        const [tailR, tailC] = this.activeTouch.tailRC;
+        if (startR === tailR && startC === tailC) {
+            // Can't select a single ball, so return early here
+            this.board.deselectAllBalls();
+        } else {
+            // Is a valid selection, lets collapse!
+            this.collapse();
+        }
         this.activeTouch = null;
     }
 
