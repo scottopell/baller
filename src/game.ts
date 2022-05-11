@@ -25,7 +25,7 @@ class Game {
     activeTouch: ActiveTouch | null;
     currentTouches: Map<number, ActiveTouch>;
 
-    constructor(canvas: HTMLCanvasElement, dimensions: CanvasDimensions) {
+    constructor(canvas: HTMLCanvasElement, dimensions: CanvasDimensions, seed: string) {
         console.log(`canvas dimensions: ${JSON.stringify(dimensions)}`);
         const ctx: CanvasRenderingContext2D = <CanvasRenderingContext2D>(
             canvas.getContext("2d", { alpha: false })
@@ -33,7 +33,7 @@ class Game {
         this.ctx = ctx;
 
         const boardSizing = new BoardSizing(k_GRID_SIZE, Math.min(dimensions.height, dimensions.width), true);
-        this.board = new Board(k_GRID_SIZE, k_NUM_COLORS, boardSizing);
+        this.board = new Board(k_GRID_SIZE, k_NUM_COLORS, boardSizing, seed);
 
         this.currentTouches = new Map();
         this.activeTouch = null;

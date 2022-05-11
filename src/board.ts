@@ -3,6 +3,18 @@ import { BoardSizing } from "./boardsizing";
 const EmptySpotStringVal = "__emptySpot";
 type EmptySpot = typeof EmptySpotStringVal;
 
+type SeedRandomInstance = () => number;
+
+// TODO, this and the attempted interface-merge below don't work
+type SeedRandomConstructor = {
+    new(seed: string): SeedRandomInstance,
+}
+
+interface Math {
+    seedrandom: SeedRandomConstructor,
+}
+
+
 class Ball {
     color: number;
     isSelected: boolean;
@@ -20,21 +32,27 @@ class Board {
     grid: Array<Array<Ball | EmptySpot>>;
     numBallVariants: number;
     sizing: BoardSizing;
+    seededRngs: Array<SeedRandomInstance>
 
-    constructor(gridSize: number, numBallVariants: number, sizing: BoardSizing) {
+    constructor(gridSize: number, numBallVariants: number, sizing: BoardSizing, seed: string) {
         this.grid = [];
         this.sizing = sizing;
         this.numBallVariants = numBallVariants;
+        this.seededRngs = [];
+        for (let c = 0; c < gridSize; c++) {
+            // @ts-expect-error
+            this.seededRngs[c] = new Math.seedrandom(`${seed}-${c}`);
+        }
         for (let r = 0; r < gridSize; r++) {
             this.grid[r] = [];
             for (let c = 0; c < gridSize; c++) {
-                this.grid[r][c] = new Ball(Math.floor(Math.random() * numBallVariants), false);
+                this.grid[r][c] = new Ball(Math.floor(this.seededRngs[c]() * numBallVariants), false);
             }
         }
     }
 
-    ballFeeder(column) {
-        return new Ball(Math.floor(Math.random() * this.numBallVariants), false);
+    ballFeeder(column: number) {
+        return new Ball(Math.floor(this.seededRngs[column]() * this.numBallVariants), false);
     }
 
     removeSelectedBalls() {

@@ -47,7 +47,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (element) {
         const canvas = element as HTMLCanvasElement;
         const dimensions = resizeCanvas(canvas);
-        const game = new Game(canvas, dimensions);
+        const d = new Date();
+        const seed = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+        const game = new Game(canvas, dimensions, seed);
         game.run();
     } else {
         console.error("Couldn't find canvas element");
