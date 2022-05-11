@@ -2,7 +2,7 @@ import { BoardSizing } from "./boardsizing";
 import { Board } from "./board";
 import { resizeCanvas } from "./canvasutils";
 
-const k_GRID_SIZE = 15;
+const k_GRID_SIZE = 10;
 
 const selectionColor = "#f7f758";
 const emptyBallColor = "#4e4e4e";
@@ -26,6 +26,7 @@ class Game {
     board: Board;
     activeTouch: ActiveTouch | null;
     currentTouches: Map<number, ActiveTouch>;
+    score: number;
 
     constructor(canvas: HTMLCanvasElement, dimensions: CanvasDimensions, seed: string) {
         console.log(`canvas dimensions: ${JSON.stringify(dimensions)}`);
@@ -40,6 +41,7 @@ class Game {
 
         this.currentTouches = new Map();
         this.activeTouch = null;
+        this.score = 0;
 
         const touchEventHandler = (e: TouchEvent) => {
             e.preventDefault();
@@ -62,9 +64,11 @@ class Game {
          * 4. new balls should be fed in from a ball-feeder
          *
          */
-        this.board.removeSelectedBalls();
+        const numRemoved = this.board.removeSelectedBalls();
         this.board.gravitationallyPullDownBalls();
         this.board.feedNewBalls();
+
+        return numRemoved;
     }
 
     handleTouch(touch: Touch, eventType: string) {
@@ -193,7 +197,10 @@ class Game {
             this.board.deselectAllBalls();
         } else {
             // Is a valid selection, lets collapse!
-            this.collapse();
+            const newPoints = this.collapse();
+            console.log(`Just scored ${newPoints} Points!`);
+            this.score += newPoints;
+
         }
         this.activeTouch = null;
     }
@@ -203,8 +210,16 @@ class Game {
         this.activeTouch = null;
     }
 
-    gameLoop(timestamp: number) {
-        this.ctx.clearRect(0, 0, this.board.sizing.boardSizeInPixels, this.board.sizing.boardSizeInPixels);
+    domDrawLoop() {
+        const scoreElement = document.getElementById("score");
+        if (scoreElement) {
+            scoreElement.innerText = "" + this.score;
+        }
+    }
+
+    canvasDrawLoop() {
+        this.ctx.fillStyle = "#FFFFFF";
+        this.ctx.fillRect(0, 0, this.board.sizing.boardSizeInPixels, this.board.sizing.boardSizeInPixels);
         //console.log(`Gameloop running at ${timestamp}`);
         const ballRadius = this.board.sizing.ballRadius;
 
@@ -230,6 +245,11 @@ class Game {
                 this.ctx.fill();
             }
         }
+    }
+
+    gameLoop(timestamp: number) {
+        this.canvasDrawLoop();
+        this.domDrawLoop();
     }
 
     run() {

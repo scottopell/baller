@@ -56,14 +56,18 @@ class Board {
     }
 
     removeSelectedBalls() {
+        let numRemoved = 0;
         for (let r = 0; r < this.gridSize; r++) {
             for (let c = 0; c < this.gridSize; c++) {
                 const ball = this.grid[r][c];
                 if (ball !== Board.EmptySpot && ball.isSelected) {
                     this.grid[r][c] = Board.EmptySpot;
+                    numRemoved++;
                 }
             }
         }
+
+        return numRemoved;
     }
 
     deselectAllBalls() {
