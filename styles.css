@@ -1,0 +1,15 @@
+body {
+    font-family: "arial";
+}
+.center {
+    margin: 0 auto;
+    text-align: center;
+}
+
+canvas {
+    border-radius: 5px;
+}
+
+div.canvas-container {
+    margin: auto 2%;
+}

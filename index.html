@@ -14,13 +14,17 @@
 
 
   <meta name="theme-color" content="#fafafa">
+  <link href="styles.css" rel="stylesheet">
 </head>
 
 <body>
 
   <!-- Add your site or application content here -->
-  <h1>Baller</h1>
-  <canvas id="canvas" style="margin-left: 200"></canvas>
+  <h1 class="center">Baller</h1>
+  <p>Today's puzzle, connect runs of the same color and watch the score go up!</p>
+  <div class='canvas-container'>
+      <canvas id="canvas"></canvas>
+  </div>
   <script src="//cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js"> </script>
   <script src="src/main.ts"></script>
 

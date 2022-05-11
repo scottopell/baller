@@ -3,12 +3,12 @@ type CartCoord = [number, number];
 
 class BoardSizing {
     numItems: number
-    size: number
+    boardSizeInPixels: number
     hasStandardMargin: boolean
 
-    constructor(numItems: number, size: number, hasStandardMargin: boolean) {
+    constructor(numItems: number, sizeInPixels: number, hasStandardMargin: boolean) {
         this.numItems = numItems;
-        this.size = size;
+        this.boardSizeInPixels = sizeInPixels;
         this.hasStandardMargin = hasStandardMargin;
     }
 
@@ -18,7 +18,7 @@ class BoardSizing {
             boxItemCountForCalculations++;
         }
 
-        const boxDimension = Math.floor(this.size / (boxItemCountForCalculations))
+        const boxDimension = Math.floor(this.boardSizeInPixels / (boxItemCountForCalculations))
         return boxDimension;
     }
 

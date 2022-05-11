@@ -1,5 +1,6 @@
 import { BoardSizing } from "./boardsizing";
 import { Board } from "./board";
+import { resizeCanvas } from "./canvasutils";
 
 const k_GRID_SIZE = 15;
 
@@ -19,6 +20,7 @@ interface ActiveTouch {
     tailRC: [number, number],
 }
 
+
 class Game {
     ctx: CanvasRenderingContext2D;
     board: Board;
@@ -34,6 +36,7 @@ class Game {
 
         const boardSizing = new BoardSizing(k_GRID_SIZE, Math.min(dimensions.height, dimensions.width), true);
         this.board = new Board(k_GRID_SIZE, k_NUM_COLORS, boardSizing, seed);
+        resizeCanvas(canvas, boardSizing.boardSizeInPixels);
 
         this.currentTouches = new Map();
         this.activeTouch = null;
@@ -201,7 +204,7 @@ class Game {
     }
 
     gameLoop(timestamp: number) {
-        this.ctx.clearRect(0, 0, this.board.sizing.size, this.board.sizing.size);
+        this.ctx.clearRect(0, 0, this.board.sizing.boardSizeInPixels, this.board.sizing.boardSizeInPixels);
         //console.log(`Gameloop running at ${timestamp}`);
         const ballRadius = this.board.sizing.ballRadius;
 
