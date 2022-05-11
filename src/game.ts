@@ -3,6 +3,7 @@ import { Board, BoardSizing } from "./boardsizing";
 const k_GRID_SIZE = 15;
 
 const selectionColor = "#f7f758";
+const emptyBallColor = "#4e4e4e";
 const numToColor = ["#d73033", "#f98500", '#420ed2', '#df19ae', '#27e046'];
 const k_NUM_COLORS = numToColor.length;
 
@@ -49,6 +50,15 @@ class Game {
     }
 
     collapse() {
+        /*
+         * Idea is to
+         * 1. remove balls with 'isSelected' === true
+         * 2. Now there are empty spaces in the board
+         * 3. "gravity" should pull down any balls above the empty spaces to fill in
+         * 4. new balls should be fed in from a ball-feeder
+         *
+         */
+        this.board.removeSelectedBalls();
     }
 
     handleTouch(touch: Touch, eventType: string) {
@@ -101,7 +111,9 @@ class Game {
             tailRC: [r, c],
         };
         const currentBall = this.board.get(r, c);
-        currentBall.isSelected = true;
+        if (currentBall !== Board.EmptySpot) {
+            currentBall.isSelected = true;
+        }
     }
 
     handleMoveTouch(touch: Touch) {
@@ -127,6 +139,10 @@ class Game {
         // Continuation of existing touch
         const [ tailRow, tailColumn ] = this.activeTouch.tailRC;
         const tailBall = this.board.get(tailRow, tailColumn);
+        if (tailBall === Board.EmptySpot) {
+            throw new Error("Somehow tail ball is an empty spot!");
+        }
+
         const rowColumnCoord = this._touchToRC(touch);
         if (rowColumnCoord === null) {
             // Out of bounds, no valid ball at coordinate
@@ -134,15 +150,16 @@ class Game {
         }
         const [r, c] = rowColumnCoord;
         const currentBall = this.board.get(r, c);
+        if (currentBall === Board.EmptySpot) {
+            return;
+        }
+
         console.log(`Move.\n\tTailR: ${tailRow} TailC: ${tailColumn} TailColor: ${tailBall.color}\n\tr: ${r} c: ${c} color: ${currentBall.color}`);
 
         if (currentBall.isSelected) {
             // No backtracking on path selections
             return;
         }
-
-        // if currentball is one to left/right/down/up
-        // and currentball is same color
 
         if (tailBall.color !== currentBall.color) {
             // Invalid move, not going to record anything;
@@ -159,6 +176,7 @@ class Game {
 
     handleEndTouch(touch: Touch) {
         if (this.activeTouch === null) {
+            // This can happen if the corresponding "start" event is out-of-bounds
             console.error("Got end event, but there was no active touch. Nothing to do.");
             return;
         }
@@ -172,22 +190,31 @@ class Game {
     }
 
     gameLoop(timestamp: number) {
+        this.ctx.clearRect(0, 0, this.board.sizing.size, this.board.sizing.size);
         //console.log(`Gameloop running at ${timestamp}`);
         const ballRadius = this.board.sizing.ballRadius;
 
         for (const { ball, row, column } of this.board) {
             const [xCoord, yCoord] = this.board.sizing.rowColumnToCartesianCoord(row, column);
-            if (ball.isSelected) {
+            if (ball === Board.EmptySpot) {
                 //console.log(`Dot at ${r}, ${c} is selected`);
                 this.ctx.beginPath();
-                this.ctx.fillStyle = selectionColor;
-                this.ctx.arc(xCoord, yCoord, ballRadius + 2, 0, Math.PI * 2);
+                this.ctx.strokeStyle = emptyBallColor;
+                this.ctx.arc(xCoord, yCoord, ballRadius, 0, Math.PI * 2);
+                this.ctx.stroke();
+            } else {
+                if (ball.isSelected) {
+                    //console.log(`Dot at ${r}, ${c} is selected`);
+                    this.ctx.beginPath();
+                    this.ctx.fillStyle = selectionColor;
+                    this.ctx.arc(xCoord, yCoord, ballRadius + 2, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+                this.ctx.beginPath();
+                this.ctx.fillStyle = numToColor[ball.color];
+                this.ctx.arc(xCoord, yCoord, ballRadius, 0, Math.PI * 2);
                 this.ctx.fill();
             }
-            this.ctx.beginPath();
-            this.ctx.fillStyle = numToColor[ball.color];
-            this.ctx.arc(xCoord, yCoord, ballRadius, 0, Math.PI * 2);
-            this.ctx.fill();
         }
     }
 

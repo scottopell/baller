@@ -1,6 +1,10 @@
 type DotCoord = [number, number];
 type CartCoord = [number, number];
 
+
+const EmptySpotStringVal = "__emptySpot";
+type EmptySpot = typeof EmptySpotStringVal;
+
 class Ball {
     color: number;
     isSelected: boolean;
@@ -12,7 +16,9 @@ class Ball {
 }
 
 class Board {
-    grid: Array<Array<Ball>>;
+    static EmptySpot: EmptySpot = EmptySpotStringVal;
+
+    grid: Array<Array<Ball | EmptySpot>>;
     sizing: BoardSizing;
 
     constructor(gridSize: number, numBallVariants: number, sizing: BoardSizing) {
@@ -22,6 +28,17 @@ class Board {
             this.grid[r] = [];
             for (let c = 0; c < gridSize; c++) {
                 this.grid[r][c] = new Ball(Math.floor(Math.random() * numBallVariants), false);
+            }
+        }
+    }
+
+    removeSelectedBalls() {
+        for (let r = 0; r < this.gridSize; r++) {
+            for (let c = 0; c < this.gridSize; c++) {
+                const ball = this.grid[r][c];
+                if (ball !== Board.EmptySpot && ball.isSelected) {
+                    this.grid[r][c] = Board.EmptySpot;
+                }
             }
         }
     }
@@ -40,7 +57,7 @@ class Board {
         const grid = this.grid;
         const gridSize = this.gridSize;
         return {
-            next(): IteratorResult<{ball: Ball, row: number, column: number}> {
+            next(): IteratorResult<{ball: Ball | EmptySpot, row: number, column: number}> {
                 if (c === gridSize - 1) {
                     c = 0;
                     r++;
@@ -56,8 +73,6 @@ class Board {
             }
         };
     }
-
-
 
 }
 
