@@ -21,7 +21,7 @@ class Board {
         for (let r = 0; r < gridSize; r++) {
             this.grid[r] = [];
             for (let c = 0; c < gridSize; c++) {
-                this.grid[r][c] = new Ball(Math.round(Math.random() * numBallVariants), false);
+                this.grid[r][c] = new Ball(Math.floor(Math.random() * numBallVariants), false);
             }
         }
     }
@@ -98,10 +98,12 @@ class BoardSizing {
         return 0;
     }
 
-    cartesianCoordToRowColumn(x: number, y: number): DotCoord {
-        console.log(`Tapped on ${x}, ${y}`);
+    cartesianCoordToRowColumn(x: number, y: number): DotCoord | null {
         let rowGuess = Math.floor(y / this.ballBoundingBoxSize);
         let colGuess = Math.floor(x / this.ballBoundingBoxSize);
+        if (rowGuess < 0 || rowGuess >= this.numItems || colGuess < 0 || colGuess >= this.numItems) {
+            return null;
+        }
         return [rowGuess, colGuess];
     }
 
