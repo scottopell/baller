@@ -1,4 +1,5 @@
-import { Board, BoardSizing } from "./boardsizing";
+import { BoardSizing } from "./boardsizing";
+import { Board } from "./board";
 
 const k_GRID_SIZE = 15;
 
