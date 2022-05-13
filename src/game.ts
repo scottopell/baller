@@ -27,6 +27,8 @@ class Game {
     activeTouch: ActiveTouch | null;
     currentTouches: Map<number, ActiveTouch>;
     score: number;
+    stopNow: boolean;
+    seed: string;
 
     constructor(canvas: HTMLCanvasElement, dimensions: CanvasDimensions, seed: string) {
         console.log(`canvas dimensions: ${JSON.stringify(dimensions)}`);
@@ -42,6 +44,8 @@ class Game {
         this.currentTouches = new Map();
         this.activeTouch = null;
         this.score = 0;
+        this.stopNow = false;
+        this.seed = seed;
 
         const touchEventHandler = (e: TouchEvent) => {
             e.preventDefault();
@@ -215,25 +219,27 @@ class Game {
         if (scoreElement) {
             scoreElement.innerText = "" + this.score;
         }
+        const seedDisplay = document.getElementById("currentSeedDisplay");
+        if (seedDisplay) {
+            seedDisplay.innerText = `"${this.seed}"`;
+        }
+
     }
 
     canvasDrawLoop() {
         this.ctx.fillStyle = "#FFFFFF";
         this.ctx.fillRect(0, 0, this.board.sizing.boardSizeInPixels, this.board.sizing.boardSizeInPixels);
-        //console.log(`Gameloop running at ${timestamp}`);
         const ballRadius = this.board.sizing.ballRadius;
 
         for (const { ball, row, column } of this.board) {
             const [xCoord, yCoord] = this.board.sizing.rowColumnToCartesianCoord(row, column);
             if (ball === Board.EmptySpot) {
-                //console.log(`Dot at ${r}, ${c} is selected`);
                 this.ctx.beginPath();
                 this.ctx.strokeStyle = emptyBallColor;
                 this.ctx.arc(xCoord, yCoord, ballRadius, 0, Math.PI * 2);
                 this.ctx.stroke();
             } else {
                 if (ball.isSelected) {
-                    //console.log(`Dot at ${r}, ${c} is selected`);
                     this.ctx.beginPath();
                     this.ctx.fillStyle = selectionColor;
                     this.ctx.arc(xCoord, yCoord, ballRadius + 2, 0, Math.PI * 2);
@@ -255,9 +261,15 @@ class Game {
     run() {
         const cb = (timestamp: number) => {
             this.gameLoop(timestamp);
-            window.requestAnimationFrame(cb);
+            if (!this.stopNow) {
+                window.requestAnimationFrame(cb);
+            }
         };
         cb(Date.now());
+    }
+
+    stop() {
+        this.stopNow = true;
     }
 
 }

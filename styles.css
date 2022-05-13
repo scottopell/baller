@@ -6,10 +6,19 @@ body {
     text-align: center;
 }
 
+#score {
+    font-weight: bold
+}
+
 canvas {
     border-radius: 5px;
 }
 
 div.canvas-container {
     margin: auto 2%;
+}
+
+.seed-display {
+    font-size: smaller;
+    opacity: 40%;
 }

@@ -1,7 +1,7 @@
 const k_WIDTH_PERCENTAGE = 0.90;
 
 
-function resizeCanvas(canvas: HTMLCanvasElement, newSizeInPixels: number) {
+function resizeCanvas(canvas: HTMLCanvasElement, newSizeInPixels: number | undefined) {
     if (newSizeInPixels !== undefined) {
         canvas.width = newSizeInPixels;
         canvas.height = newSizeInPixels;
