@@ -2,7 +2,7 @@ import { BoardSizing } from "./boardsizing";
 import { Board } from "./board";
 import { resizeCanvas } from "./canvasutils";
 
-const k_GRID_SIZE = 10;
+const k_GRID_SIZE = 7;
 
 const selectionColor = "#f7f758";
 const emptyBallColor = "#4e4e4e";
@@ -18,6 +18,7 @@ interface ActiveTouch {
     touchId: number,
     startRC: [number, number],
     tailRC: [number, number],
+    selectedColor: number,
 }
 
 
@@ -68,6 +69,14 @@ class Game {
          * 4. new balls should be fed in from a ball-feeder
          *
          */
+        if (this.activeTouch === null) {
+            throw new Error("Invariant broken, collapse called with no active touch");
+        }
+
+        if (this.board.isSquareSelected()) {
+            console.log("Found a square!!");
+            this.board.selectAllOfColor(this.activeTouch.selectedColor);
+        }
         const numRemoved = this.board.removeSelectedBalls();
         this.board.gravitationallyPullDownBalls();
         this.board.feedNewBalls();
@@ -119,14 +128,15 @@ class Game {
         }
         const [r, c] = rowColumnCoord;
         console.log(`Start. r ${r} c ${c}`);
-        this.activeTouch = {
-            touchId: touch.identifier,
-            startRC: [r, c],
-            tailRC: [r, c],
-        };
         const currentBall = this.board.get(r, c);
         if (currentBall !== Board.EmptySpot) {
             currentBall.isSelected = true;
+            this.activeTouch = {
+                touchId: touch.identifier,
+                startRC: [r, c],
+                tailRC: [r, c],
+                selectedColor: currentBall.color,
+            };
         }
     }
 

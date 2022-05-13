@@ -55,23 +55,53 @@ class Board {
         return new Ball(Math.floor(this.seededRngs[column]() * this.numBallVariants), false);
     }
 
-    removeSelectedBalls() {
-        let numRemoved = 0;
+    isSquareSelected() {
+        const isSelected = (row: number, column: number) => {
+            if (row >= this.gridSize || column >= this.gridSize) {
+                return false;
+            }
+
+            const ball = this.grid[row][column];
+            return ball !== Board.EmptySpot && ball.isSelected;
+        }
+
         for (let r = 0; r < this.gridSize; r++) {
             for (let c = 0; c < this.gridSize; c++) {
                 const ball = this.grid[r][c];
                 if (ball !== Board.EmptySpot && ball.isSelected) {
-                    this.grid[r][c] = Board.EmptySpot;
-                    numRemoved++;
+                    if (isSelected(r + 1, c) && isSelected(r, c + 1) && isSelected(r + 1, c + 1)) {
+                        return true;
+                    }
                 }
+            }
+        }
+
+        return false;
+    }
+
+
+    removeSelectedBalls() {
+        let numRemoved = 0;
+        for (const { ball, row, column } of this) {
+            if (ball !== Board.EmptySpot && ball.isSelected) {
+                this.grid[row][column] = Board.EmptySpot;
+                numRemoved++;
             }
         }
 
         return numRemoved;
     }
 
+    selectAllOfColor(color: number) {
+        for (const { ball, row, column } of this) {
+            if (ball !== Board.EmptySpot && ball.color === color) {
+                ball.isSelected = true;
+            }
+        }
+    }
+
     deselectAllBalls() {
-        for (const {ball, r, c} of this) {
+        for (const {ball, row, column} of this) {
             if (ball !== Board.EmptySpot) {
                 ball.isSelected = false;
             }
