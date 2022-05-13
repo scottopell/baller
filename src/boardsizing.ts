@@ -53,4 +53,4 @@ class BoardSizing {
     }
 }
 
-export { BoardSizing }
+export { BoardSizing, DotCoord }

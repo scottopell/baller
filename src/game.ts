@@ -1,4 +1,4 @@
-import { BoardSizing } from "./boardsizing";
+import { BoardSizing, DotCoord } from "./boardsizing";
 import { Board } from "./board";
 import { resizeCanvas } from "./canvasutils";
 
@@ -16,9 +16,8 @@ interface CanvasDimensions {
 
 interface ActiveTouch {
     touchId: number,
-    startRC: [number, number],
-    tailRC: [number, number],
     selectedColor: number,
+    selectionPath: Array<DotCoord>,
 }
 
 
@@ -97,9 +96,6 @@ class Game {
             throw new Error("Unknown touch type");
         }
         console.log(`Processed touch ${touch.identifier}. activeTouch is now ${this.activeTouch !== null ? "not" : ""} null.`);
-        if (this.activeTouch !== null) {
-            console.log(`After touch. tailR ${this.activeTouch.tailRC[0]} tailC ${this.activeTouch.tailRC[1]}`);
-        }
     }
 
     _touchToRC(touch: Touch) {
@@ -133,9 +129,8 @@ class Game {
             currentBall.isSelected = true;
             this.activeTouch = {
                 touchId: touch.identifier,
-                startRC: [r, c],
-                tailRC: [r, c],
                 selectedColor: currentBall.color,
+                selectionPath: [[r, c]],
             };
         }
     }
@@ -161,7 +156,7 @@ class Game {
             return;
         }
         // Continuation of existing touch
-        const [ tailRow, tailColumn ] = this.activeTouch.tailRC;
+        const [ tailRow, tailColumn ] = this.activeTouch.selectionPath[this.activeTouch.selectionPath.length - 1];
         const tailBall = this.board.get(tailRow, tailColumn);
         if (tailBall === Board.EmptySpot) {
             throw new Error("Somehow tail ball is an empty spot!");
@@ -182,6 +177,7 @@ class Game {
 
         if (currentBall.isSelected) {
             // No backtracking on path selections
+            // TODO allow backtracking
             return;
         }
 
@@ -192,7 +188,7 @@ class Game {
         }
         if (isImmediateNeighbor([tailRow, tailColumn], [r, c])) {
             currentBall.isSelected = true;
-            this.activeTouch.tailRC = [r, c];
+            this.activeTouch.selectionPath.push([r, c]);
         } else {
             console.log(`Current is not immediate neighbor, continueing...`);
         }
@@ -204,8 +200,11 @@ class Game {
             console.error("Got end event, but there was no active touch. Nothing to do.");
             return;
         }
-        const [startR, startC] = this.activeTouch.startRC;
-        const [tailR, tailC] = this.activeTouch.tailRC;
+        const firstSelected = this.activeTouch.selectionPath[0];
+        const lastSelected = this.activeTouch.selectionPath[this.activeTouch.selectionPath.length - 1];
+
+        const [startR, startC] = firstSelected;
+        const [tailR, tailC] = lastSelected;
         if (startR === tailR && startC === tailC) {
             // Can't select a single ball, so return early here
             this.board.deselectAllBalls();
